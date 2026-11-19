@@ -1693,7 +1693,7 @@
       }
 
       function renderChooseOwner() {
-        const accountName = state.selectedAccount === 'wechat' ? '曙光（微信）' : 'demo@example.com（邮箱）';
+        const accountName = selectedAccountName();
         return renderMigrationFrame(
           '<div class="memory-migration-card choose-owner-card">' +
             '<div class="memory-migration-illustration" aria-hidden="true">' +
@@ -1961,6 +1961,10 @@
         );
       }
 
+      function selectedAccountName() {
+        return state.selectedAccount === 'wechat' ? '曙光（微信）' : 'demo@example.com（邮箱）';
+      }
+
       function renderDialogs() {
         let html = '';
         if (state.skipDialogOpen) {
@@ -1968,12 +1972,12 @@
             '<div class="dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="skipDialogTitle">' +
               '<div class="alert-dialog-content">' +
                 '<div class="alert-dialog-header">' +
-                  '<h2 class="alert-dialog-title" id="skipDialogTitle">确认暂不迁移？</h2>' +
-                  '<p class="alert-dialog-desc">将<strong>暂停生成新的觉知、洞见和心迹</strong>。之后可随时在「设置 &gt; 通用 &gt; 数据」上传并开启此功能。</p>' +
+                  '<h2 class="alert-dialog-title" id="skipDialogTitle">确认本地数据归属</h2>' +
+                  '<p class="alert-dialog-desc">即使暂不迁移，这台设备上的历史数据也会按账号隔离。请确认这些数据属于以下账号，之后只有该账号可以在本地查看。<strong style="display:block;margin-block:8px;overflow-wrap:anywhere;">' + selectedAccountName() + '</strong>将<strong>暂停生成新的觉知、洞见和心迹</strong>。之后可随时在「设置 &gt; 通用 &gt; 数据」上传并开启此功能。</p>' +
                 '</div>' +
                 '<div class="alert-dialog-footer">' +
                   '<button type="button" class="btn btn-lg btn-default" id="cancelSkipBtn">取消</button>' +
-                  '<button type="button" class="btn btn-lg btn-outline" id="confirmSkipBtn">暂不迁移</button>' +
+                  '<button type="button" class="btn btn-lg btn-outline" id="confirmSkipBtn">确认归属并暂不迁移</button>' +
                 '</div>' +
               '</div>' +
             '</div>';
