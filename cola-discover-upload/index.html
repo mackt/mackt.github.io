@@ -773,6 +773,9 @@
       gap: 20px;
     }
 
+    .skip-dialog-content { max-width: 512px; }
+    .skip-dialog-content .alert-dialog-desc { align-self: stretch; text-align: left; }
+
     .alert-dialog-header {
       display: flex;
       flex-direction: column;
@@ -1970,7 +1973,7 @@
         if (state.skipDialogOpen) {
           html +=
             '<div class="dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="skipDialogTitle">' +
-              '<div class="alert-dialog-content">' +
+              '<div class="alert-dialog-content skip-dialog-content">' +
                 '<div class="alert-dialog-header">' +
                   '<h2 class="alert-dialog-title" id="skipDialogTitle">确认暂不迁移？</h2>' +
                   '<p class="alert-dialog-desc">Cola 将<strong>暂停生成新的觉知、洞见和心迹</strong>。之后可随时前往「设置 &gt; 通用 &gt; 数据」，开启「同步发现到云端」。</p><p class="alert-dialog-desc">这台设备上的历史数据将绑定到 <strong>' + selectedAccountName() + '</strong>。之后只有此账号可在本地查看历史数据。</p>' +
