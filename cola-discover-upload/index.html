@@ -455,8 +455,14 @@
       scrollbar-width: thin;
     }
 
-    .migration-scroll-body .pick-label {
-      margin-top: 16px;
+    .migration-account { flex-shrink: 0; }
+    .migration-account-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--cola-text-muted);
+      font-size: 13px;
     }
 
     .migration-scroll-body .inline-info-wrap {
@@ -1433,6 +1439,8 @@
 
     @media (max-height: 720px) {
       .choose-owner-card .memory-migration-illustration { display: none; }
+      .choose-owner-card .option-card { padding-block: 7px; }
+      .migration-center:has(.choose-owner-card) { padding-block: 4px; }
       .memory-migration-card.choose-owner-card { gap: 12px; padding: 18px 24px; }
       .memory-migration-page:has(.choose-owner-card) { padding-block: 12px; }
     }
@@ -1689,7 +1697,8 @@
             '</div>' +
             '<div class="migration-scroll-body" role="region" aria-label="「发现」数据迁移" tabindex="0">' +
               '<div class="migration-lead">' +
-                '从这个版本开始，Cola 的主动性生成的内容，包括心迹、洞见、觉知将会使用云端方案，因此需要进行一次迁移。<br>在迁移完成之后，这些数据将存储在你的云端数据库中。这样你可以在任何设备都可以访问和查看这些内容。<br>这次数据迁移仅限 Cola 主动性生成的内容，不包括任何记忆、聊天记录等信息。' +
+                '从这个版本开始，Cola 的主动性生成的内容，包括<strong>心迹、洞见、觉知</strong>将会使用云端方案，因此需要进行一次迁移。<br>在迁移完成之后，这些数据将存储在你的云端数据库中。这样你可以在任何设备都可以访问和查看这些内容。</div>' +
+              '<div class="migration-lead">这次数据迁移仅限 Cola 主动性生成的内容，<strong>不包括任何记忆、聊天记录等信息</strong>。' +
                 '<span class="inline-info-wrap" id="pathsInfoWrap">' +
                   '<button type="button" class="inline-info-btn" id="pathsInfoBtn" aria-label="查看本地目录">' + svgIcon('info', 14) + '</button>' +
                   '<div class="inline-info-popover" role="tooltip">' +
@@ -1702,20 +1711,21 @@
                     '</ul>' +
                   '</div>' +
                 '</span>' +
+              '<br>同时，我们将严格保护你的云端个人数据和隐私。</div>' +
+              '<div class="migration-lead">你也可以选择不进行迁移。<br>如果点击【暂不迁移】按钮，Cola 将<strong>不会主动性生成任何新内容</strong>。<br>但已有的历史内容依然可以<strong>在本地查看</strong>。</div>' +
+            '</div>' +
+            '<div class="migration-account">' +
+              '<div class="migration-account-heading">' +
+                '<span>迁移至以下账号</span>' +
+                '<button type="button" class="btn btn-link" id="openSwitchAccountBtn">使用其他账号</button>' +
               '</div>' +
-              '<div class="migration-lead">同时，我们将严格保护你的云端个人数据和隐私。<br>你也可以选择不进行迁移。<br>如果点击【暂不迁移】按钮，Cola 将不会主动性生成任何新内容。<br>但已有的历史内容依然可以在本地查看。</div>' +
-              '<div class="pick-label">迁移至以下账号</div>' +
               '<button type="button" class="option-card">' +
                 '<span class="option-card-icon">' + svgIcon('user', 18) + '</span>' +
                 '<span>' +
                   '<div class="option-card-title">' + accountName + '</div>' +
-                  '<div class="option-card-desc">当前登录账号</div>' +
                 '</span>' +
                 '<span class="option-card-check">' + svgIcon('check', 12) + '</span>' +
               '</button>' +
-              '<div class="use-other-row">' +
-                '<button type="button" class="btn btn-link" id="openSwitchAccountBtn">使用其他账号</button>' +
-              '</div>' +
             '</div>' +
             '<div class="migration-footer">' +
               '<button type="button" class="btn btn-link" id="openSkipDialogBtn">暂不迁移</button>' +
