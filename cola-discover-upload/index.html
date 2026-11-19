@@ -1499,7 +1499,7 @@
         screen: 'choose_owner', // 'checking' | 'choose_owner' | 'moving_local' | 'syncing' | 'discover' | 'settings'
         skipDialogOpen: false,
         switchAccountOpen: false,
-        syncDialogOpen: false,
+        pendingSync: null,
         deleteDialogOpen: false,
         backupBeforeDelete: true,
         backupFolder: null,
@@ -1613,7 +1613,7 @@
         clearPendingTimer();
         state.skipDialogOpen = false;
         state.switchAccountOpen = false;
-        state.syncDialogOpen = false;
+        state.pendingSync = null;
         state.deleteDialogOpen = false;
         state.screen = target;
 
@@ -1658,7 +1658,7 @@
         state.screen = 'checking';
         state.skipDialogOpen = false;
         state.switchAccountOpen = false;
-        state.syncDialogOpen = false;
+        state.pendingSync = null;
         state.deleteDialogOpen = false;
         state.skipped = false;
         state.migrated = false;
@@ -2013,13 +2013,13 @@
               '</div>' +
             '</div>';
         }
-        if (state.syncDialogOpen) {
+        if (state.pendingSync !== null) {
           html +=
             '<div class="dialog-backdrop" role="alertdialog" aria-modal="true" aria-labelledby="syncDialogTitle" aria-describedby="syncDialogBody">' +
               '<div class="alert-dialog-content sync-dialog-content">' +
                 '<div class="alert-dialog-header">' +
-                  '<h2 class="alert-dialog-title" id="syncDialogTitle">同步发现到云端？</h2>' +
-                  '<p class="alert-dialog-desc" id="syncDialogBody">Cola 的觉知、洞见和心迹将保存至云端。</p>' +
+                  '<h2 class="alert-dialog-title" id="syncDialogTitle">' + (state.pendingSync ? '同步发现到云端？' : '关闭发现同步？') + '</h2>' +
+                  '<p class="alert-dialog-desc" id="syncDialogBody">' + (state.pendingSync ? 'Cola 的觉知、洞见和心迹将保存至云端。' : 'Cola 将暂停生成新的觉知、洞见和心迹。已同步的内容会保留在云端。') + '</p>' +
                 '</div>' +
                 '<div class="alert-dialog-footer">' +
                   '<button type="button" class="btn btn-lg btn-outline" id="cancelSyncBtn">取消</button>' +
@@ -2158,31 +2158,28 @@
 
         const swDiscoverySync = document.getElementById('switchDiscoverySync');
         if (swDiscoverySync) swDiscoverySync.addEventListener('click', function () {
-          if (swDiscoverySync.getAttribute('aria-checked') === 'true') {
-            state.switches = { awareness: false, recommendation: false, imprint: false };
-          } else {
-            state.syncDialogOpen = true;
-          }
+          state.pendingSync = swDiscoverySync.getAttribute('aria-checked') !== 'true';
           render();
           document.getElementById('cancelSyncBtn')?.focus();
         });
 
         const cancelSync = document.getElementById('cancelSyncBtn');
         if (cancelSync) cancelSync.addEventListener('click', function () {
-          state.syncDialogOpen = false;
+          state.pendingSync = null;
           render();
           document.getElementById('switchDiscoverySync')?.focus();
         });
 
         const confirmSync = document.getElementById('confirmSyncBtn');
         if (confirmSync) confirmSync.addEventListener('click', function () {
-          state.syncDialogOpen = false;
-          if (state.skipped && !state.migrated) {
+          const enabled = state.pendingSync;
+          state.pendingSync = null;
+          if (enabled && state.skipped && !state.migrated) {
             state.syncReturnTo = 'settings';
             gotoScreen('syncing');
             return;
           }
-          state.switches = { awareness: true, recommendation: true, imprint: true };
+          state.switches = { awareness: enabled, recommendation: enabled, imprint: enabled };
           render();
           document.getElementById('switchDiscoverySync')?.focus();
         });
