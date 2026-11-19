@@ -1415,6 +1415,7 @@
         screen: 'choose_owner', // 'checking' | 'choose_owner' | 'moving_local' | 'syncing' | 'discover' | 'settings'
         skipDialogOpen: false,
         switchAccountOpen: false,
+        syncDialogOpen: false,
         deleteDialogOpen: false,
         backupBeforeDelete: true,
         selectedAccount: 'wechat',
@@ -1527,6 +1528,7 @@
         clearPendingTimer();
         state.skipDialogOpen = false;
         state.switchAccountOpen = false;
+        state.syncDialogOpen = false;
         state.deleteDialogOpen = false;
         state.screen = target;
 
@@ -1571,6 +1573,7 @@
         state.screen = 'checking';
         state.skipDialogOpen = false;
         state.switchAccountOpen = false;
+        state.syncDialogOpen = false;
         state.deleteDialogOpen = false;
         state.skipped = false;
         state.migrated = false;
@@ -1920,6 +1923,21 @@
               '</div>' +
             '</div>';
         }
+        if (state.syncDialogOpen) {
+          html +=
+            '<div class="dialog-backdrop" role="alertdialog" aria-modal="true" aria-labelledby="syncDialogTitle" aria-describedby="syncDialogBody">' +
+              '<div class="alert-dialog-content">' +
+                '<div class="alert-dialog-header">' +
+                  '<h2 class="alert-dialog-title" id="syncDialogTitle">同步发现到云端？</h2>' +
+                  '<p class="alert-dialog-desc" id="syncDialogBody">Cola 的觉知、推荐和悄悄话将保存至云端，以便在其他设备上查看。</p>' +
+                '</div>' +
+                '<div class="alert-dialog-footer">' +
+                  '<button type="button" class="btn btn-lg btn-outline" id="cancelSyncBtn">取消</button>' +
+                  '<button type="button" class="btn btn-lg btn-default" id="confirmSyncBtn">确认同步</button>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+        }
         if (state.deleteDialogOpen) {
           html +=
             '<div class="dialog-backdrop" role="alertdialog" aria-modal="true" aria-labelledby="deleteDialogTitle">' +
@@ -2047,16 +2065,33 @@
 
         const swDiscoverySync = document.getElementById('switchDiscoverySync');
         if (swDiscoverySync) swDiscoverySync.addEventListener('click', function () {
+          if (swDiscoverySync.getAttribute('aria-checked') === 'true') {
+            state.switches = { awareness: false, recommendation: false, imprint: false };
+          } else {
+            state.syncDialogOpen = true;
+          }
+          render();
+          document.getElementById('cancelSyncBtn')?.focus();
+        });
+
+        const cancelSync = document.getElementById('cancelSyncBtn');
+        if (cancelSync) cancelSync.addEventListener('click', function () {
+          state.syncDialogOpen = false;
+          render();
+          document.getElementById('switchDiscoverySync')?.focus();
+        });
+
+        const confirmSync = document.getElementById('confirmSyncBtn');
+        if (confirmSync) confirmSync.addEventListener('click', function () {
+          state.syncDialogOpen = false;
           if (state.skipped && !state.migrated) {
             state.syncReturnTo = 'settings';
             gotoScreen('syncing');
             return;
           }
-          const next = !(state.switches.awareness || state.switches.recommendation || state.switches.imprint);
-          state.switches.awareness = next;
-          state.switches.recommendation = next;
-          state.switches.imprint = next;
+          state.switches = { awareness: true, recommendation: true, imprint: true };
           render();
+          document.getElementById('switchDiscoverySync')?.focus();
         });
 
         const openDeleteBtn = document.getElementById('openDeleteDialogBtn');
