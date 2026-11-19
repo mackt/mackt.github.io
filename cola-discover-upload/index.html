@@ -429,6 +429,48 @@
       padding: 48px 40px;
     }
 
+    .preview-stage:has(.choose-owner-card) {
+      height: 100dvh;
+    }
+
+    .migration-center:has(.choose-owner-card), .choose-owner-card {
+      min-height: 0;
+    }
+
+    .choose-owner-card {
+      max-height: 100%;
+    }
+
+    .choose-owner-card > :is(.migration-header, .migration-footer) {
+      flex-shrink: 0;
+    }
+
+    .migration-scroll-body {
+      position: relative;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-right: 8px;
+      scrollbar-color: var(--cola-border-strong) transparent;
+      scrollbar-width: thin;
+    }
+
+    .migration-scroll-body .pick-label {
+      margin-top: 16px;
+    }
+
+    .migration-scroll-body .inline-info-wrap {
+      position: static;
+    }
+
+    .migration-scroll-body .inline-info-popover {
+      left: auto;
+      right: 0;
+      top: auto;
+      transform: none;
+      max-width: 100%;
+    }
+
     .migration-header {
       display: flex;
       flex-direction: column;
@@ -1389,6 +1431,12 @@
       text-align: center;
     }
 
+    @media (max-height: 720px) {
+      .choose-owner-card .memory-migration-illustration { display: none; }
+      .memory-migration-card.choose-owner-card { gap: 12px; padding: 18px 24px; }
+      .memory-migration-page:has(.choose-owner-card) { padding-block: 12px; }
+    }
+
     @media (max-width: 780px) {
       .app-window {
         height: 680px;
@@ -1624,7 +1672,7 @@
       function renderChooseOwner() {
         const accountName = state.selectedAccount === 'wechat' ? '曙光（微信）' : 'demo@example.com（邮箱）';
         return renderMigrationFrame(
-          '<div class="memory-migration-card">' +
+          '<div class="memory-migration-card choose-owner-card">' +
             '<div class="memory-migration-illustration" aria-hidden="true">' +
               '<div class="memory-migration-device">' + svgIcon('laptop', 20) + '</div>' +
               '<div class="memory-migration-connector">' +
@@ -1638,6 +1686,8 @@
               '<div>' +
                 '<h1 class="migration-title">「发现」数据迁移</h1>' +
               '</div>' +
+            '</div>' +
+            '<div class="migration-scroll-body" role="region" aria-label="「发现」数据迁移" tabindex="0">' +
               '<div class="migration-lead">' +
                 '从这个版本开始，Cola 的主动性生成的内容，包括心迹、洞见、觉知将会使用云端方案，因此需要进行一次迁移。<br>在迁移完成之后，这些数据将存储在你的云端数据库中。这样你可以在任何设备都可以访问和查看这些内容。<br>这次数据迁移仅限 Cola 主动性生成的内容，不包括任何记忆、聊天记录等信息。' +
                 '<span class="inline-info-wrap" id="pathsInfoWrap">' +
@@ -1654,8 +1704,6 @@
                 '</span>' +
               '</div>' +
               '<div class="migration-lead">同时，我们将严格保护你的云端个人数据和隐私。<br>你也可以选择不进行迁移。<br>如果点击【暂不迁移】按钮，Cola 将不会主动性生成任何新内容。<br>但已有的历史内容依然可以在本地查看。</div>' +
-            '</div>' +
-            '<div>' +
               '<div class="pick-label">迁移至以下账号</div>' +
               '<button type="button" class="option-card">' +
                 '<span class="option-card-icon">' + svgIcon('user', 18) + '</span>' +
