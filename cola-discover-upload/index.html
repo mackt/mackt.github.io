@@ -820,7 +820,7 @@
     .skip-dialog-content .alert-dialog-footer { justify-content: center; }
     .skip-dialog-content .alert-dialog-footer .btn { flex: none; height: 36px; padding-inline: 24px; }
 
-    .sync-dialog-content { max-width: 448px; }
+    .sync-dialog-content { width: max-content; max-width: min(512px, 100%); padding-inline: 20px; }
     .sync-dialog-content .alert-dialog-title { margin-bottom: 8px; }
     .sync-dialog-content .alert-dialog-desc { align-self: stretch; text-align: left; line-height: 24px; }
     .sync-dialog-content .alert-dialog-footer { flex-direction: row; justify-content: center; }
@@ -2024,7 +2024,7 @@
                 '</div>' +
                 '<div class="alert-dialog-footer">' +
                   '<button type="button" class="btn btn-lg btn-outline" id="cancelSyncBtn">取消</button>' +
-                  '<button type="button" class="btn btn-lg btn-default" id="confirmSyncBtn">确认同步</button>' +
+                  '<button type="button" class="btn btn-lg btn-default" id="confirmSyncBtn">默认</button>' +
                 '</div>' +
               '</div>' +
             '</div>';
