@@ -1593,7 +1593,7 @@
         const tabs = [
           { id: 'checking', label: '启动检查 Loading' },
           { id: 'choose_owner', label: '上传引导' },
-          { id: 'skip_modal', label: '暂不上传弹窗' },
+          { id: 'skip_modal', label: '暂不迁移弹窗' },
           { id: 'moving_local', label: '本地数据准备 Loading' },
           { id: 'syncing', label: '上传中 Loading' },
           { id: 'discover', label: '主界面 · 发现' },
@@ -1636,11 +1636,10 @@
             '</div>' +
             '<div class="migration-header">' +
               '<div>' +
-                '<h1 class="migration-title">将「发现」数据上传至云端？</h1>' +
-                '<p class="migration-subtitle">我们会严格保护你的个人数据与隐私。</p>' +
+                '<h1 class="migration-title">「发现」数据迁移</h1>' +
               '</div>' +
               '<div class="migration-lead">' +
-                '上传后，Cola 的<strong>觉知、洞见和心迹</strong>将保存至你的账号，以便在其他设备上查看。' +
+                '从这个版本开始，Cola 的主动性生成的内容，包括心迹、洞见、觉知将会使用云端方案，因此需要进行一次迁移。<br>在迁移完成之后，这些数据将存储在你的云端数据库中。这样你可以在任何设备都可以访问和查看这些内容。<br>这次数据迁移仅限 Cola 主动性生成的内容，不包括任何记忆、聊天记录等信息。' +
                 '<span class="inline-info-wrap" id="pathsInfoWrap">' +
                   '<button type="button" class="inline-info-btn" id="pathsInfoBtn" aria-label="查看本地目录">' + svgIcon('info', 14) + '</button>' +
                   '<div class="inline-info-popover" role="tooltip">' +
@@ -1649,14 +1648,15 @@
                       '<li><code class="inline-info-item-path">~/.cola/awareness/entries.jsonl</code></li>' +
                       '<li><code class="inline-info-item-path">~/.cola/awareness/recommendations/</code></li>' +
                       '<li><code class="inline-info-item-path">~/.cola/awareness/imprints/</code></li>' +
+                      '<li><code class="inline-info-item-path">~/.cola/achievements/memory-events.jsonl</code></li>' +
                     '</ul>' +
                   '</div>' +
                 '</span>' +
               '</div>' +
-              '<div class="migration-lead">若选择暂不上传，你仍可在本机查看已有内容，但将<strong>暂停生成新的觉知、洞见和心迹</strong>。之后可随时在「设置 &gt; 通用 &gt; 数据」上传并开启此功能。</div>' +
+              '<div class="migration-lead">同时，我们将严格保护你的云端个人数据和隐私。<br>你也可以选择不进行迁移。<br>如果点击【暂不迁移】按钮，Cola 将不会主动性生成任何新内容。<br>但已有的历史内容依然可以在本地查看。</div>' +
             '</div>' +
             '<div>' +
-              '<div class="pick-label">上传至以下账号</div>' +
+              '<div class="pick-label">迁移至以下账号</div>' +
               '<button type="button" class="option-card">' +
                 '<span class="option-card-icon">' + svgIcon('user', 18) + '</span>' +
                 '<span>' +
@@ -1670,8 +1670,8 @@
               '</div>' +
             '</div>' +
             '<div class="migration-footer">' +
-              '<button type="button" class="btn btn-link" id="openSkipDialogBtn">暂不上传</button>' +
-              '<button type="button" class="btn btn-lg btn-brand-light" id="startUploadBtn">开始上传 →</button>' +
+              '<button type="button" class="btn btn-link" id="openSkipDialogBtn">暂不迁移</button>' +
+              '<button type="button" class="btn btn-lg btn-brand-light" id="startUploadBtn">开始迁移 →</button>' +
             '</div>' +
           '</div>'
         );
@@ -1895,12 +1895,12 @@
             '<div class="dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="skipDialogTitle">' +
               '<div class="alert-dialog-content">' +
                 '<div class="alert-dialog-header">' +
-                  '<h2 class="alert-dialog-title" id="skipDialogTitle">确认暂不上传？</h2>' +
+                  '<h2 class="alert-dialog-title" id="skipDialogTitle">确认暂不迁移？</h2>' +
                   '<p class="alert-dialog-desc">将<strong>暂停生成新的觉知、洞见和心迹</strong>。之后可随时在「设置 &gt; 通用 &gt; 数据」上传并开启此功能。</p>' +
                 '</div>' +
                 '<div class="alert-dialog-footer">' +
                   '<button type="button" class="btn btn-lg btn-default" id="cancelSkipBtn">取消</button>' +
-                  '<button type="button" class="btn btn-lg btn-outline" id="confirmSkipBtn">暂不上传</button>' +
+                  '<button type="button" class="btn btn-lg btn-outline" id="confirmSkipBtn">暂不迁移</button>' +
                 '</div>' +
               '</div>' +
             '</div>';
