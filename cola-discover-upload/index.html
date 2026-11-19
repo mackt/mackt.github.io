@@ -448,11 +448,17 @@
     .migration-scroll-body {
       position: relative;
       min-height: 0;
-      overflow-y: auto;
+      overflow-y: scroll;
       overscroll-behavior: contain;
       padding-right: 8px;
-      scrollbar-color: var(--cola-border-strong) transparent;
-      scrollbar-width: thin;
+      scrollbar-gutter: stable;
+    }
+
+    .migration-scroll-body::-webkit-scrollbar { width: 8px; }
+    .migration-scroll-body::-webkit-scrollbar-track { background: var(--cola-bg-surface); border-radius: 999px; }
+    .migration-scroll-body::-webkit-scrollbar-thumb { background: var(--cola-text-subtle); border-radius: 999px; }
+    @supports not selector(::-webkit-scrollbar) {
+      .migration-scroll-body { scrollbar-color: var(--cola-text-subtle) var(--cola-bg-surface); }
     }
 
     .migration-account { flex-shrink: 0; }
@@ -803,6 +809,8 @@
     .delete-dialog-content {
       max-width: 340px;
     }
+
+    .backup-directory { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 8px; overflow-wrap: anywhere; }
 
     .delete-backup-row {
       display: flex;
@@ -1474,6 +1482,7 @@
         syncDialogOpen: false,
         deleteDialogOpen: false,
         backupBeforeDelete: true,
+        backupFolder: null,
         selectedAccount: 'wechat',
         skipped: false,
         migrated: false,
@@ -2010,8 +2019,10 @@
                   '</button>' +
                   '<span>导出至本地</span>' +
                 '</label>' +
+                (state.backupBeforeDelete ?
+                  '<div class="backup-directory"><span id="backupFolderName"></span><button type="button" class="btn btn-sm btn-outline" id="pickBackupDir">选择目录</button><input type="file" webkitdirectory hidden id="backupDirFallback"></div>' : '') +
                 '<div class="alert-dialog-footer">' +
-                  '<button type="button" class="btn btn-lg btn-destructive" id="confirmDeleteBtn">确认删除</button>' +
+                  '<button type="button" class="btn btn-lg btn-destructive" id="confirmDeleteBtn"' + (state.backupBeforeDelete && !state.backupFolder ? ' disabled' : '') + '>确认删除</button>' +
                   '<button type="button" class="btn btn-lg btn-outline" id="cancelDeleteBtn">取消</button>' +
                 '</div>' +
               '</div>' +
@@ -2154,15 +2165,40 @@
 
         const openDeleteBtn = document.getElementById('openDeleteDialogBtn');
         if (openDeleteBtn) openDeleteBtn.addEventListener('click', function () {
+          state.backupFolder = null;
           state.backupBeforeDelete = true;
           state.deleteDialogOpen = true;
           render();
         });
 
+        const folderName = document.getElementById('backupFolderName');
+        if (folderName) folderName.textContent = state.backupFolder || '';
+        const pickDir = document.getElementById('pickBackupDir');
+        const dirFallback = document.getElementById('backupDirFallback');
+        if (dirFallback) dirFallback.addEventListener('change', function () {
+          const file = dirFallback.files[0];
+          if (!file) return;
+          state.backupFolder = file.webkitRelativePath.split('/')[0];
+          render();
+        });
+        if (pickDir) pickDir.addEventListener('click', async function () {
+          if (!window.showDirectoryPicker) { dirFallback.click(); return; }
+          try {
+            const directory = await window.showDirectoryPicker({mode:'read'});
+            if (!pickDir.isConnected) return;
+            state.backupFolder = directory.name;
+            render();
+          } catch (error) {
+            if (error.name !== 'AbortError') dirFallback.click();
+          }
+        });
+
         const backupCheckbox = document.getElementById('backupBeforeDeleteCheckbox');
         if (backupCheckbox) backupCheckbox.addEventListener('click', function () {
           state.backupBeforeDelete = !state.backupBeforeDelete;
+          state.backupFolder = null;
           render();
+          if (state.backupBeforeDelete) document.getElementById('pickBackupDir').click();
         });
 
         const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
@@ -2176,7 +2212,7 @@
           const backedUp = state.backupBeforeDelete;
           state.deletedCloud = { awareness: true, recommendations: true, imprints: true };
           state.deleteDialogOpen = false;
-          showToast(backedUp ? '已导出备份至 ~/Desktop/awareness 并删除云端发现数据' : '已删除云端发现数据');
+          showToast(backedUp ? '已模拟完成本地导出和云端删除' : '已删除云端发现数据');
         });
       }
 
