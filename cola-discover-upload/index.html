@@ -1,0 +1,2123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cola · 发现云端迁移与设置 1:1 原型</title>
+  <style>
+    :root {
+      /* Exact Cola default pure-white palette tokens (colors.css + spacing.css + shadows.css) */
+      --cola-gray-50: 255, 255, 255;
+      --cola-gray-100: 243, 243, 243;
+      --cola-gray-200: 229, 229, 229;
+      --cola-gray-300: 212, 212, 212;
+      --cola-gray-400: 163, 163, 163;
+      --cola-gray-500: 115, 115, 115;
+      --cola-gray-600: 82, 82, 82;
+      --cola-gray-700: 64, 64, 64;
+      --cola-gray-800: 41, 41, 41;
+      --cola-gray-900: 26, 26, 26;
+      --cola-white: 255, 255, 255;
+      --cola-black: 0, 0, 0;
+      --cola-brand-base: 241, 117, 45;
+      --cola-green: 92, 186, 95;
+      --cola-blue: 60, 134, 242;
+
+      --cola-bg: rgb(var(--cola-gray-50));
+      --cola-bg-surface: rgb(var(--cola-gray-100));
+      --cola-settings-card-bg: color-mix(in srgb, var(--cola-bg-surface) 50%, var(--cola-bg));
+      --cola-bg-control: rgb(var(--cola-white));
+      --cola-product-shell-background: var(--cola-bg-surface);
+
+      --cola-fill-black: rgb(var(--cola-black));
+      --cola-fill-white: rgb(var(--cola-white));
+      --cola-fill-success: rgb(var(--cola-green));
+      --cola-success: color-mix(in srgb, rgb(var(--cola-green)) 60%, var(--cola-text));
+      --cola-success-bg: rgba(var(--cola-green), 0.1);
+      --cola-success-border: rgba(var(--cola-green), 0.25);
+      --cola-fill-danger: rgb(242, 97, 81);
+      --cola-danger: color-mix(in srgb, rgb(242, 97, 81) 75%, var(--cola-text));
+      --cola-danger-bg: rgba(242, 97, 81, 0.1);
+      --cola-text-on-danger: rgb(255, 255, 255);
+      --cola-fill-secondary: rgb(var(--cola-gray-300));
+      --cola-switch-thumb: rgb(var(--cola-white));
+
+      --cola-text: rgb(var(--cola-gray-900));
+      --cola-text-strong: rgb(var(--cola-black));
+      --cola-text-secondary: rgb(var(--cola-gray-700));
+      --cola-text-muted: rgb(var(--cola-gray-600));
+      --cola-text-subtle: rgb(var(--cola-gray-500));
+      --cola-text-tertiary: rgb(var(--cola-gray-400));
+      --cola-text-disabled: rgb(var(--cola-gray-300));
+
+      --cola-border: rgba(var(--cola-gray-200), 0.72);
+      --cola-border-button-outline: rgb(var(--cola-gray-200));
+      --cola-border-strong: rgb(var(--cola-gray-400));
+
+      --cola-accent: rgb(var(--cola-black));
+      --cola-accent-soft: rgba(var(--cola-black), 0.08);
+      --cola-text-on-accent: rgb(var(--cola-white));
+      --cola-brand: rgb(var(--cola-brand-base));
+      --cola-brand-soft: rgba(var(--cola-brand-base), 0.1);
+      --cola-text-brand: color-mix(in srgb, var(--cola-brand) 65%, var(--cola-text));
+      --cola-link: color-mix(in srgb, rgb(var(--cola-blue)) 80%, var(--cola-text));
+      --cola-dialog-overlay: rgba(var(--cola-black), 0.5);
+
+      --cola-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --cola-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.04);
+      --cola-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
+      --cola-shadow-xl: 0 24px 80px rgba(0, 0, 0, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      min-height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--cola-text);
+      background: #ECEAE6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+      background: none;
+      border: 0;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+    }
+
+    .preview-stage {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 18px 20px 28px;
+      gap: 14px;
+    }
+
+    /* Non-intrusive reviewer switcher outside the desktop app window */
+    .preview-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      max-width: 1120px;
+      width: 100%;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(0, 0, 0, 0.07);
+      backdrop-filter: blur(10px);
+    }
+
+    .preview-toolbar-label {
+      font-size: 12px;
+      color: var(--cola-text-subtle);
+      padding: 0 6px 0 4px;
+      user-select: none;
+    }
+
+    .preview-tab {
+      height: 28px;
+      padding: 0 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--cola-text-muted);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .preview-tab:hover {
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--cola-text-strong);
+    }
+
+    .preview-tab.active {
+      background: var(--cola-text-strong);
+      color: #fff;
+    }
+
+    .preview-divider {
+      width: 1px;
+      height: 14px;
+      background: rgba(0, 0, 0, 0.12);
+      margin: 0 4px;
+    }
+
+    .preview-reset {
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--cola-text-muted);
+    }
+
+    .preview-reset:hover {
+      background: rgba(0, 0, 0, 0.06);
+      color: var(--cola-text-strong);
+    }
+
+    /* 1:1 Cola macOS Window Container */
+    .app-window {
+      position: relative;
+      width: 100%;
+      max-width: 1100px;
+      height: 700px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: var(--cola-bg);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.14), 0 4px 16px rgba(0, 0, 0, 0.06);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .traffic-lights {
+      position: absolute;
+      top: 15px;
+      left: 16px;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .traffic-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      border: 0.5px solid rgba(0, 0, 0, 0.12);
+    }
+
+    .traffic-dot.red { background: #FF5F57; }
+    .traffic-dot.yellow { background: #FEBC2E; }
+    .traffic-dot.green { background: #28C840; }
+
+    /* Shared Button Primitives (button.tsx) */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s;
+      user-select: none;
+    }
+
+    .btn-lg {
+      height: 40px;
+      padding: 0 32px;
+    }
+
+    .btn-sm {
+      height: 32px;
+      padding: 0 16px;
+      font-size: 13px;
+    }
+
+    .btn-default {
+      background: var(--cola-accent);
+      color: var(--cola-text-on-accent);
+    }
+
+    .btn-default:hover {
+      opacity: 0.9;
+    }
+
+    .btn-brand-light {
+      background: var(--cola-brand-soft);
+      color: var(--cola-text-brand);
+    }
+
+    .btn-brand-light:hover {
+      background: color-mix(in srgb, var(--cola-brand) 16%, transparent);
+    }
+
+    .btn-outline {
+      background: var(--cola-bg);
+      color: var(--cola-text-strong);
+      border: 1px solid var(--cola-border-button-outline);
+      box-shadow: var(--cola-shadow-xs);
+    }
+
+    .btn-outline:hover {
+      background: var(--cola-bg-surface);
+    }
+
+    .btn-ghost-destructive {
+      background: transparent;
+      color: var(--cola-danger);
+    }
+
+    .btn-ghost-destructive:hover:not(:disabled) {
+      background: var(--cola-danger-bg);
+    }
+
+    .btn-destructive {
+      background: var(--cola-fill-danger);
+      color: var(--cola-text-on-danger);
+    }
+
+    .btn-destructive:hover:not(:disabled) {
+      opacity: 0.92;
+    }
+
+    .delete-category-box {
+      border-radius: 12px;
+      border: 1px solid var(--cola-border);
+      background: var(--cola-settings-card-bg);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .delete-category-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--cola-text-strong);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .cola-checkbox {
+      width: 15px;
+      height: 15px;
+      border-radius: 3px;
+      border: 1px solid var(--cola-border-strong);
+      background: transparent;
+      color: transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.12s, border-color 0.12s;
+    }
+
+    .cola-checkbox[aria-checked="true"] {
+      border-color: var(--cola-accent);
+      background: var(--cola-accent);
+      color: var(--cola-text-on-accent);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--cola-text-muted);
+    }
+
+    .btn-ghost:hover:not(:disabled) {
+      background: var(--cola-bg-surface);
+      color: var(--cola-text-strong);
+    }
+
+    .btn-link {
+      height: auto;
+      padding: 0;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--cola-text-muted);
+      text-decoration: none;
+    }
+
+    .btn-link:hover {
+      color: var(--cola-text);
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    /* Animations */
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .animate-spin {
+      animation: spin 1s linear infinite;
+    }
+
+    /* ═══════════════════════════════════════════
+       1. StartupLoading (`checking` state)
+       ═══════════════════════════════════════════ */
+    .startup-loading {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--cola-bg);
+      color: var(--cola-text-muted);
+    }
+
+    /* ═══════════════════════════════════════════
+       2. MemoryMigrationGate (`memory-migration.css` + `memory-migration-gate.tsx`)
+       ═══════════════════════════════════════════ */
+    .memory-migration-page {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      background:
+        radial-gradient(64rem 34rem at 50% -10%, color-mix(in srgb, var(--cola-accent) 6%, transparent), transparent 68%),
+        var(--cola-bg);
+      padding: 20px 28px 36px;
+    }
+
+    .migration-topbar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      min-height: 34px;
+    }
+
+    .lang-select {
+      height: 32px;
+      width: 144px;
+      border-radius: 8px;
+      border: 1px solid var(--cola-border);
+      background: var(--cola-bg-control);
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--cola-text);
+      box-shadow: var(--cola-shadow-xs);
+    }
+
+    .migration-center {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 0;
+    }
+
+    .memory-migration-card {
+      width: 100%;
+      max-width: 576px; /* max-w-xl */
+      border-radius: 24px; /* rounded-3xl */
+      border: 1px solid var(--cola-border);
+      background: color-mix(in srgb, var(--cola-bg) 94%, var(--cola-bg-surface));
+      box-shadow: var(--cola-shadow-lg);
+      padding: 36px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .memory-migration-card.centered {
+      align-items: center;
+      text-align: center;
+      padding: 48px 40px;
+    }
+
+    .migration-header {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .memory-migration-card.centered .migration-header {
+      align-items: center;
+    }
+
+    .migration-title {
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.35;
+      letter-spacing: -0.015em;
+      color: var(--cola-text-strong);
+    }
+
+    .migration-subtitle {
+      margin-top: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      line-height: 1.5;
+      color: var(--cola-text-strong);
+    }
+
+    .migration-lead {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--cola-text-muted);
+    }
+
+    .migration-lead strong {
+      font-weight: 600;
+      color: var(--cola-text-strong);
+    }
+
+    .migration-lead + .migration-lead {
+      margin-top: 8px;
+    }
+
+    .inline-info-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+      margin-left: 4px;
+    }
+
+    .inline-info-btn {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cola-text-muted);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .inline-info-btn:hover,
+    .inline-info-wrap.open .inline-info-btn {
+      background: var(--cola-bg-surface);
+      color: var(--cola-text-strong);
+    }
+
+    .inline-info-popover {
+      position: absolute;
+      left: 26px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 40;
+      width: 288px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--cola-border);
+      background: var(--cola-bg);
+      box-shadow: var(--cola-shadow-lg);
+      text-align: left;
+      display: none;
+    }
+
+    .inline-info-wrap:hover .inline-info-popover,
+    .inline-info-wrap:focus-within .inline-info-popover,
+    .inline-info-wrap.open .inline-info-popover {
+      display: block;
+    }
+
+    .inline-info-popover-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--cola-text-strong);
+      margin-bottom: 6px;
+    }
+
+    .inline-info-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .inline-info-item-label {
+      display: block;
+      font-weight: 500;
+      color: var(--cola-text-secondary);
+    }
+
+    .inline-info-item-path {
+      display: block;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      color: var(--cola-text-muted);
+    }
+
+    /* SyncIllustration */
+    .memory-migration-illustration {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      border-radius: 16px;
+      border: 1px solid var(--cola-border);
+      padding: 20px 24px;
+      background:
+        radial-gradient(24rem 12rem at 50% 0%, color-mix(in srgb, var(--cola-accent) 7%, transparent), transparent 72%),
+        var(--cola-bg-surface);
+    }
+
+    .memory-migration-device {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      border: 1px solid var(--cola-border);
+      background: var(--cola-bg);
+      color: var(--cola-text-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--cola-shadow-sm);
+    }
+
+    .memory-migration-connector {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--cola-text-muted);
+    }
+
+    .connector-line {
+      width: 28px;
+      height: 1px;
+      background: var(--cola-border);
+    }
+
+    .cloud-badge {
+      position: relative;
+      display: inline-flex;
+      color: var(--cola-text-strong);
+    }
+
+    .cloud-sparkle {
+      position: absolute;
+      right: -4px;
+      top: -4px;
+      width: 14px;
+      height: 14px;
+      color: var(--cola-brand);
+    }
+
+    /* Account OptionCard */
+    .pick-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--cola-text-muted);
+      margin-bottom: 10px;
+    }
+
+    .option-card {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1.5px solid var(--cola-accent);
+      background: color-mix(in srgb, var(--cola-accent) 6%, var(--cola-bg));
+      text-align: left;
+      box-shadow: 0 0 0 1px var(--cola-accent);
+    }
+
+    .option-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      background: var(--cola-bg-surface);
+      color: var(--cola-text-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .option-card-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--cola-text-strong);
+    }
+
+    .option-card-desc {
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--cola-text-muted);
+    }
+
+    .option-card-check {
+      margin-left: auto;
+      width: 20px;
+      height: 20px;
+      border-radius: 999px;
+      background: var(--cola-accent);
+      color: var(--cola-text-on-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .use-other-row {
+      display: flex;
+      justify-content: center;
+      margin-top: 12px;
+    }
+
+    .migration-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 4px;
+    }
+
+    /* Busy spinner icon in preparing/syncing/moving_local */
+    .screen-spinner-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      background: var(--cola-accent-soft);
+      color: var(--cola-accent);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 6px;
+    }
+
+    /* ═══════════════════════════════════════════
+       3. AlertDialog (`SkipMigration` + SwitchAccount)
+       ═══════════════════════════════════════════ */
+    .dialog-backdrop {
+      position: absolute;
+      inset: 0;
+      z-index: 60;
+      background: var(--cola-dialog-overlay);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .alert-dialog-content {
+      width: 100%;
+      max-width: 280px;
+      border-radius: 16px;
+      border: 1px solid var(--cola-border);
+      background: var(--cola-bg);
+      padding: 24px 20px 20px;
+      box-shadow: var(--cola-shadow-lg);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .alert-dialog-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 8px;
+    }
+
+    .alert-dialog-title {
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.35;
+      color: var(--cola-text-strong);
+      margin-bottom: 2px;
+    }
+
+    .alert-dialog-desc {
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--cola-text-muted);
+    }
+
+    .alert-dialog-desc strong {
+      font-weight: 600;
+      color: var(--cola-text-strong);
+    }
+
+    .alert-dialog-footer {
+      display: flex;
+      flex-direction: row-reverse;
+      gap: 8px;
+    }
+
+    .alert-dialog-footer .btn {
+      flex: 1;
+      padding: 0 12px;
+      font-size: 14px;
+    }
+
+    .delete-dialog-content {
+      max-width: 340px;
+    }
+
+    .delete-backup-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      border-radius: 12px;
+      border: 1px solid var(--cola-border);
+      background: var(--cola-settings-card-bg);
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--cola-text-strong);
+      cursor: pointer;
+    }
+
+    .cola-checkbox {
+      width: 16px;
+      height: 16px;
+      margin-top: 2px;
+      border-radius: 4px;
+      border: 1.5px solid var(--cola-border);
+      background: var(--cola-bg);
+      color: var(--cola-bg);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.14s, border-color 0.14s;
+    }
+
+    .cola-checkbox[aria-checked="true"] {
+      background: var(--cola-brand);
+      border-color: var(--cola-brand);
+      color: #ffffff;
+    }
+
+    /* ═══════════════════════════════════════════
+       4. Main Desktop Shell (ProductSidebar + Content Card)
+       ═══════════════════════════════════════════ */
+    .product-shell {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: row;
+      background: var(--cola-product-shell-background);
+      position: relative;
+    }
+
+    .product-rail {
+      width: 64px;
+      flex-shrink: 0;
+      padding-top: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      z-index: 20;
+    }
+
+    .rail-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 8px 5px;
+      width: 100%;
+      align-items: center;
+    }
+
+    .rail-item {
+      width: 54px;
+      padding: 6px 0;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      line-height: 1;
+      color: var(--cola-text-muted);
+      transition: background 0.15s, color 0.15s;
+      position: relative;
+    }
+
+    .rail-item:hover {
+      background: var(--cola-bg);
+      color: var(--cola-text-strong);
+    }
+
+    .rail-item.selected {
+      color: var(--cola-brand);
+    }
+
+    .rail-item.selected:hover {
+      color: var(--cola-brand);
+    }
+
+    .rail-icon-wrap {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .rail-bottom {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .rail-avatar-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      background: var(--cola-bg);
+      border: 1px solid var(--cola-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--cola-text-strong);
+      box-shadow: var(--cola-shadow-xs);
+    }
+
+    .rail-avatar-btn:hover {
+      background: var(--cola-bg-surface);
+    }
+
+    .rail-gear-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cola-text-muted);
+    }
+
+    .rail-gear-btn:hover,
+    .rail-gear-btn.active {
+      background: var(--cola-bg);
+      color: var(--cola-text-strong);
+    }
+
+    .content-card-outer {
+      flex: 1;
+      min-width: 0;
+      margin: 4px 4px 4px 0;
+      border-radius: 12px;
+      border: 1px solid var(--cola-border);
+      background: var(--cola-bg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ═══════════════════════════════════════════
+       5. Discover Page (`InsightFeedPage`)
+       ═══════════════════════════════════════════ */
+    .feed-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 16px 24px 36px;
+    }
+
+    .feed-container {
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .insight-feed-header {
+      position: relative;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 20px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--cola-bg-surface), var(--cola-bg));
+      overflow: hidden;
+    }
+
+    .insight-feed-header-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--cola-text-strong);
+      white-space: nowrap;
+    }
+
+    .insight-feed-header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .filter-pill-btn {
+      height: 30px;
+      padding: 0 11px;
+      border-radius: 999px;
+      border: 1px solid var(--cola-border-button-outline);
+      background: var(--cola-bg);
+      color: var(--cola-text-muted);
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .filter-pill-btn:hover {
+      background: var(--cola-bg-surface);
+      color: var(--cola-text-strong);
+    }
+
+    .local-history-notice {
+      padding: 10px 4px 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--cola-text-muted);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .local-history-cta {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--cola-text-brand);
+      white-space: nowrap;
+    }
+
+    .local-history-cta:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .feed-date-group-title {
+      margin: 10px 0 16px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--cola-text-tertiary);
+    }
+
+    .insight-message-row {
+      display: grid;
+      grid-template-columns: 36px minmax(0, 1fr);
+      align-items: start;
+      column-gap: 10px;
+      row-gap: 10px;
+      padding: 18px 12px;
+      border-top: 1px solid rgba(0, 0, 0, 0.04);
+    }
+
+    .insight-message-row:first-of-type {
+      border-top: 0;
+    }
+
+    .insight-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      background: var(--cola-brand-soft);
+      border: 1px solid rgba(241, 117, 45, 0.22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cola-brand);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .insight-bubble {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .insight-tag {
+      display: inline-flex;
+      align-self: flex-start;
+      border-radius: 999px;
+      background: var(--cola-bg-surface);
+      padding: 3px 10px;
+      font-size: 12px;
+      color: var(--cola-text-muted);
+    }
+
+    .insight-heading {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.5;
+      color: var(--cola-text-strong);
+    }
+
+    .insight-body {
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--cola-text-strong);
+    }
+
+    .content-link-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--cola-border);
+      background: var(--cola-bg);
+      max-width: 520px;
+      transition: background 0.15s;
+    }
+
+    .content-link-card:hover {
+      background: rgba(0, 0, 0, 0.03);
+    }
+
+    .source-icon-box {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--cola-bg-surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cola-text-muted);
+      flex-shrink: 0;
+    }
+
+    .source-meta {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .source-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--cola-text-strong);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .source-subtitle {
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--cola-text-muted);
+    }
+
+    .imprint-cover {
+      width: 60%;
+      aspect-ratio: 16 / 9;
+      border-radius: 12px;
+      background:
+        radial-gradient(circle at 24% 30%, rgba(241, 117, 45, 0.18), transparent 52%),
+        radial-gradient(circle at 80% 72%, rgba(92, 186, 95, 0.14), transparent 55%),
+        linear-gradient(145deg, #FBF8F3, #F1ECE4);
+      border: 1px solid var(--cola-border);
+      display: flex;
+      align-items: flex-end;
+      padding: 14px 16px;
+      color: var(--cola-text-secondary);
+      font-size: 12px;
+    }
+
+    .insight-actions {
+      grid-column: 2;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    .insight-action-pill {
+      height: 30px;
+      padding: 0 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--cola-text-muted);
+    }
+
+    .insight-action-pill:hover {
+      background: var(--cola-bg-surface);
+      color: var(--cola-text-strong);
+    }
+
+    .insight-feedback-group {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .icon-action-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cola-text-muted);
+    }
+
+    .icon-action-btn:hover:not(:disabled) {
+      background: var(--cola-bg-surface);
+      color: var(--cola-text-strong);
+    }
+
+    /* ═══════════════════════════════════════════
+       6. Settings Panel (`variant="page"` inside shell)
+       ═══════════════════════════════════════════ */
+    .settings-page-layout {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: row;
+      background: var(--cola-bg);
+    }
+
+    .settings-sidebar {
+      width: 224px; /* --cola-product-secondary-sidebar-width */
+      flex-shrink: 0;
+      border-right: 1px solid var(--cola-border);
+      display: flex;
+      flex-direction: column;
+      background: var(--cola-bg);
+    }
+
+    .settings-sidebar-header {
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--cola-text-strong);
+    }
+
+    .settings-nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px;
+    }
+
+    .settings-nav-item {
+      height: 36px;
+      padding: 0 12px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--cola-text-muted);
+      text-align: left;
+    }
+
+    .settings-nav-item:hover {
+      background: var(--cola-bg-surface);
+      color: var(--cola-text-strong);
+    }
+
+    .settings-nav-item.active {
+      background: var(--cola-bg-surface);
+      color: var(--cola-text-strong);
+      font-weight: 500;
+    }
+
+    .settings-content-scroll {
+      flex: 1;
+      min-width: 0;
+      overflow-y: auto;
+      padding: 32px 24px 36px;
+    }
+
+    .settings-content-inner {
+      width: 100%;
+      max-width: 780px; /* --cola-settings-content-max-width */
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .settings-page-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--cola-text-strong);
+    }
+
+    .settings-module {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .settings-module-heading {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--cola-text);
+    }
+
+    .settings-module-desc {
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--cola-text-muted);
+      margin-bottom: 4px;
+    }
+
+    .settings-group {
+      border-radius: 12px;
+      border: 1px solid var(--cola-border);
+      background: var(--cola-settings-card-bg);
+      overflow: hidden;
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 16px 20px;
+      border-top: 1px solid var(--cola-border);
+    }
+
+    .settings-row:first-child {
+      border-top: 0;
+    }
+
+    .settings-row-text {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .settings-row-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--cola-text-strong);
+    }
+
+    .settings-row-desc {
+      margin-top: 3px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--cola-text-muted);
+    }
+
+    /* Exact Cola Switch (`switch.tsx`: h-5 w-9, checked=#5CBA5F, unchecked=#D4D4D4) */
+    .cola-switch {
+      width: 36px;
+      height: 20px;
+      border-radius: 999px;
+      border: 2px solid transparent;
+      background: var(--cola-fill-secondary);
+      position: relative;
+      flex-shrink: 0;
+      transition: background 0.16s ease;
+    }
+
+    .cola-switch[aria-checked="true"] {
+      background: var(--cola-fill-success);
+    }
+
+    .cola-switch-thumb {
+      display: block;
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      background: var(--cola-switch-thumb);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      transform: translateX(0);
+      transition: transform 0.16s ease;
+    }
+
+    .cola-switch[aria-checked="true"] .cola-switch-thumb {
+      transform: translateX(16px);
+    }
+
+    /* Sonner Toast (top-right inside desktop window) */
+    .toast-region {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 80;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--cola-border);
+      background: var(--cola-bg);
+      color: var(--cola-text-strong);
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: var(--cola-shadow-lg);
+      pointer-events: auto;
+    }
+
+    .toast-success-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: var(--cola-fill-success);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .hint-caption {
+      font-size: 12px;
+      color: var(--cola-text-subtle);
+      text-align: center;
+    }
+
+    @media (max-width: 780px) {
+      .app-window {
+        height: 680px;
+      }
+      .settings-sidebar {
+        width: 170px;
+      }
+      .memory-migration-card {
+        padding: 28px 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-stage">
+    <div class="preview-toolbar" id="previewToolbar"></div>
+    <div class="app-window" id="appWindow"></div>
+    <p class="hint-caption">1:1 桌面端界面原型 · 可直接点击页面交互，或通过顶部标签切换任意加载态与页面</p>
+  </div>
+
+  <script>
+    (function () {
+      const state = {
+        screen: 'choose_owner', // 'checking' | 'choose_owner' | 'moving_local' | 'syncing' | 'discover' | 'settings'
+        skipDialogOpen: false,
+        switchAccountOpen: false,
+        deleteDialogOpen: false,
+        backupBeforeDelete: true,
+        selectedAccount: 'wechat',
+        skipped: false,
+        migrated: false,
+        syncReturnTo: 'discover', // 'discover' | 'settings'
+        settingsSection: 'general',
+        switches: {
+          awareness: true,
+          recommendation: true,
+          imprint: true
+        },
+        deleteCategories: {
+          awareness: true,
+          recommendations: true,
+          imprints: true
+        },
+        deletedCloud: {
+          awareness: false,
+          recommendations: false,
+          imprints: false
+        },
+        toast: null
+      };
+
+      let timerId = null;
+      let toastTimerId = null;
+
+      function clearPendingTimer() {
+        if (timerId !== null) {
+          clearTimeout(timerId);
+          timerId = null;
+        }
+      }
+
+      function showToast(message) {
+        if (toastTimerId !== null) clearTimeout(toastTimerId);
+        state.toast = message;
+        render();
+        toastTimerId = setTimeout(function () {
+          state.toast = null;
+          render();
+        }, 3200);
+      }
+
+      function svgIcon(name, size) {
+        const s = size || 18;
+        const base = 'width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
+        switch (name) {
+          case 'loader':
+            return '<svg class="animate-spin" ' + base + '><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
+          case 'laptop':
+            return '<svg ' + base + '><path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0H4m16 0 1.28 2.55a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45L4 16"/></svg>';
+          case 'cloud':
+            return '<svg ' + base + '><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>';
+          case 'phone':
+            return '<svg ' + base + '><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>';
+          case 'sparkle':
+            return '<svg class="cloud-sparkle" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.1 6.2L20 10l-5.9 1.8L12 18l-2.1-6.2L4 10l5.9-1.8z"/></svg>';
+          case 'user':
+            return '<svg ' + base + '><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+          case 'check':
+            return '<svg width="' + s + '" height="' + s + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+          case 'chevron-down':
+            return '<svg ' + base + '><path d="m6 9 6 6 6-6"/></svg>';
+          case 'compass':
+            return '<svg ' + base + '><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor"/></svg>';
+          case 'chat':
+            return '<svg ' + base + '><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>';
+          case 'sparkles':
+            return '<svg ' + base + '><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>';
+          case 'coins':
+            return '<svg ' + base + '><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/></svg>';
+          case 'settings':
+            return '<svg ' + base + '><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>';
+          case 'filter':
+            return '<svg ' + base + '><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>';
+          case 'link':
+            return '<svg ' + base + '><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+          case 'copy':
+            return '<svg ' + base + '><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>';
+          case 'heart':
+            return '<svg ' + base + '><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>';
+          case 'share':
+            return '<svg ' + base + '><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>';
+          case 'more':
+            return '<svg ' + base + '><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>';
+          case 'sliders':
+            return '<svg ' + base + '><line x1="21" x2="14" y1="4" y2="4"/><line x1="10" x2="3" y1="4" y2="4"/><line x1="21" x2="12" y1="12" y2="12"/><line x1="8" x2="3" y1="12" y2="12"/><line x1="21" x2="16" y1="20" y2="20"/><line x1="12" x2="3" y1="20" y2="20"/><line x1="14" x2="14" y1="2" y2="6"/><line x1="8" x2="8" y1="10" y2="14"/><line x1="16" x2="16" y1="18" y2="22"/></svg>';
+          case 'keyboard':
+            return '<svg ' + base + '><rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.001M10 8h.001M14 8h.001M18 8h.001M8 12h.001M12 12h.001M16 12h.001M7 16h10"/></svg>';
+          case 'chart':
+            return '<svg ' + base + '><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>';
+          case 'audio':
+            return '<svg ' + base + '><path d="M2 10v3M6 6v11M10 3v18M14 8v7M18 5v13M22 10v3"/></svg>';
+          case 'shield':
+            return '<svg ' + base + '><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>';
+          case 'info':
+            return '<svg ' + base + '><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>';
+          case 'trash':
+            return '<svg ' + base + '><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>';
+          case 'shield-check':
+            return '<svg ' + base + '><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>';
+          default:
+            return '';
+        }
+      }
+
+      function gotoScreen(target) {
+        clearPendingTimer();
+        state.skipDialogOpen = false;
+        state.switchAccountOpen = false;
+        state.deleteDialogOpen = false;
+        state.screen = target;
+
+        if (target === 'discover' && !state.migrated && !state.skipped) {
+          state.skipped = true;
+          state.switches = { awareness: false, recommendation: false, imprint: false };
+        }
+        if (target === 'settings' && !state.migrated && !state.skipped) {
+          state.skipped = true;
+          state.switches = { awareness: false, recommendation: false, imprint: false };
+        }
+
+        if (target === 'checking') {
+          timerId = setTimeout(function () {
+            state.screen = 'choose_owner';
+            render();
+          }, 900);
+        } else if (target === 'moving_local') {
+          timerId = setTimeout(function () {
+            state.skipped = true;
+            state.migrated = false;
+            state.switches = { awareness: false, recommendation: false, imprint: false };
+            state.screen = 'discover';
+            render();
+          }, 1100);
+        } else if (target === 'syncing') {
+          timerId = setTimeout(function () {
+            state.migrated = true;
+            state.skipped = false;
+            state.switches = { awareness: true, recommendation: true, imprint: true };
+            state.deletedCloud = { awareness: false, recommendations: false, imprints: false };
+            state.screen = state.syncReturnTo === 'settings' ? 'settings' : 'discover';
+            showToast('数据上传完成');
+          }, 1400);
+        }
+
+        render();
+      }
+
+      function resetAll() {
+        clearPendingTimer();
+        state.screen = 'checking';
+        state.skipDialogOpen = false;
+        state.switchAccountOpen = false;
+        state.deleteDialogOpen = false;
+        state.skipped = false;
+        state.migrated = false;
+        state.syncReturnTo = 'discover';
+        state.switches = { awareness: true, recommendation: true, imprint: true };
+        state.deleteCategories = { awareness: true, recommendations: true, imprints: true };
+        state.deletedCloud = { awareness: false, recommendations: false, imprints: false };
+        state.toast = null;
+        render();
+        timerId = setTimeout(function () {
+          state.screen = 'choose_owner';
+          render();
+        }, 700);
+      }
+
+      function renderToolbar() {
+        const tabs = [
+          { id: 'checking', label: '启动检查 Loading' },
+          { id: 'choose_owner', label: '上传引导' },
+          { id: 'skip_modal', label: '暂不上传弹窗' },
+          { id: 'moving_local', label: '本地数据准备 Loading' },
+          { id: 'syncing', label: '上传中 Loading' },
+          { id: 'discover', label: '主界面 · 发现' },
+          { id: 'settings', label: '设置 › 通用 › 数据' }
+        ];
+
+        const activeId = state.skipDialogOpen ? 'skip_modal' : state.screen;
+        let html = '<span class="preview-toolbar-label">状态切换</span>';
+        tabs.forEach(function (tab) {
+          html += '<button type="button" class="preview-tab ' + (activeId === tab.id ? 'active' : '') + '" data-nav="' + tab.id + '">' + tab.label + '</button>';
+        });
+        html += '<span class="preview-divider"></span>';
+        html += '<button type="button" class="preview-reset" id="resetFlowBtn">重走完整流程</button>';
+        return html;
+      }
+
+      function renderMigrationFrame(innerHtml) {
+        return (
+          '<div class="memory-migration-page">' +
+            '<div class="migration-topbar">' +
+              '<button type="button" class="lang-select" aria-label="语言"><span>简体中文</span>' + svgIcon('chevron-down', 15) + '</button>' +
+            '</div>' +
+            '<div class="migration-center">' + innerHtml + '</div>' +
+          '</div>'
+        );
+      }
+
+      function renderChooseOwner() {
+        const accountName = state.selectedAccount === 'wechat' ? '曙光（微信）' : 'demo@example.com（邮箱）';
+        return renderMigrationFrame(
+          '<div class="memory-migration-card">' +
+            '<div class="memory-migration-illustration" aria-hidden="true">' +
+              '<div class="memory-migration-device">' + svgIcon('laptop', 20) + '</div>' +
+              '<div class="memory-migration-connector">' +
+                '<span class="connector-line"></span>' +
+                '<span class="cloud-badge">' + svgIcon('cloud', 24) + svgIcon('sparkle', 14) + '</span>' +
+                '<span class="connector-line"></span>' +
+              '</div>' +
+              '<div class="memory-migration-device">' + svgIcon('phone', 20) + '</div>' +
+            '</div>' +
+            '<div class="migration-header">' +
+              '<div>' +
+                '<h1 class="migration-title">将「发现」数据上传至云端？</h1>' +
+                '<p class="migration-subtitle">我们会严格保护你的个人数据与隐私。</p>' +
+              '</div>' +
+              '<div class="migration-lead">' +
+                '上传后，Cola 的<strong>觉知、推荐和悄悄话</strong>将保存至你的账号，以便在其他设备上查看。' +
+                '<span class="inline-info-wrap" id="pathsInfoWrap">' +
+                  '<button type="button" class="inline-info-btn" id="pathsInfoBtn" aria-label="查看本地目录">' + svgIcon('info', 14) + '</button>' +
+                  '<div class="inline-info-popover" role="tooltip">' +
+                    '<div class="inline-info-popover-title">将上传以下本地路径中的数据：</div>' +
+                    '<ul class="inline-info-list">' +
+                      '<li><code class="inline-info-item-path">~/.cola/awareness/entries.jsonl</code></li>' +
+                      '<li><code class="inline-info-item-path">~/.cola/awareness/recommendations/</code></li>' +
+                      '<li><code class="inline-info-item-path">~/.cola/awareness/imprints/</code></li>' +
+                    '</ul>' +
+                  '</div>' +
+                '</span>' +
+              '</div>' +
+              '<div class="migration-lead">若选择暂不上传，你仍可在本机查看已有内容，但将<strong>暂停生成新的觉知、推荐和悄悄话</strong>。之后可随时在「设置 &gt; 通用 &gt; 数据」上传并开启此功能。</div>' +
+            '</div>' +
+            '<div>' +
+              '<div class="pick-label">上传至以下账号</div>' +
+              '<button type="button" class="option-card">' +
+                '<span class="option-card-icon">' + svgIcon('user', 18) + '</span>' +
+                '<span>' +
+                  '<div class="option-card-title">' + accountName + '</div>' +
+                  '<div class="option-card-desc">当前登录账号</div>' +
+                '</span>' +
+                '<span class="option-card-check">' + svgIcon('check', 12) + '</span>' +
+              '</button>' +
+              '<div class="use-other-row">' +
+                '<button type="button" class="btn btn-link" id="openSwitchAccountBtn">使用其他账号</button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="migration-footer">' +
+              '<button type="button" class="btn btn-link" id="openSkipDialogBtn">暂不上传</button>' +
+              '<button type="button" class="btn btn-lg btn-brand-light" id="startUploadBtn">开始上传 →</button>' +
+            '</div>' +
+          '</div>'
+        );
+      }
+
+      function renderMovingLocal() {
+        return renderMigrationFrame(
+          '<div class="memory-migration-card centered">' +
+            '<div class="screen-spinner-badge">' + svgIcon('loader', 20) + '</div>' +
+            '<div class="migration-header">' +
+              '<h1 class="migration-title">正在准备本地数据</h1>' +
+              '<div class="migration-lead">本地数据准备完成后，Cola 会自动继续。</div>' +
+            '</div>' +
+          '</div>'
+        );
+      }
+
+      function renderSyncing() {
+        return renderMigrationFrame(
+          '<div class="memory-migration-card centered">' +
+            '<div class="screen-spinner-badge">' + svgIcon('loader', 20) + '</div>' +
+            '<div class="migration-header">' +
+              '<h1 class="migration-title">正在上传数据</h1>' +
+              '<div class="migration-lead">正在将这台电脑上的数据上传至你的账号，请稍候。</div>' +
+            '</div>' +
+          '</div>'
+        );
+      }
+
+      function renderRail(activeNav) {
+        return (
+          '<aside class="product-rail" aria-label="主导航">' +
+            '<nav class="rail-nav">' +
+              '<button type="button" class="rail-item" title="对话">' +
+                '<span class="rail-icon-wrap">' + svgIcon('chat', 22) + '</span>' +
+                '<span>Cola</span>' +
+              '</button>' +
+              '<button type="button" class="rail-item ' + (activeNav === 'discover' ? 'selected' : '') + '" id="railDiscoverBtn" title="发现">' +
+                '<span class="rail-icon-wrap">' + svgIcon('compass', 22) + '</span>' +
+                '<span>发现</span>' +
+              '</button>' +
+              '<button type="button" class="rail-item" title="Skills">' +
+                '<span class="rail-icon-wrap">' + svgIcon('sparkles', 20) + '</span>' +
+                '<span>Skills</span>' +
+              '</button>' +
+              '<button type="button" class="rail-item" title="理财">' +
+                '<span class="rail-icon-wrap">' + svgIcon('coins', 21) + '</span>' +
+                '<span>积分</span>' +
+              '</button>' +
+            '</nav>' +
+            '<div class="rail-bottom">' +
+              '<button type="button" class="rail-gear-btn ' + (activeNav === 'settings' ? 'active' : '') + '" id="railSettingsBtn" title="设置">' +
+                svgIcon('settings', 19) +
+              '</button>' +
+              '<button type="button" class="rail-avatar-btn" id="railAvatarBtn" title="曙光（微信）">曙</button>' +
+            '</div>' +
+          '</aside>'
+        );
+      }
+
+      function renderDiscoverPage() {
+        const readOnlyLocal = state.skipped && !state.migrated;
+        const disabledAttr = readOnlyLocal ? ' disabled title="上传至云端后可操作"' : '';
+        const showRec = readOnlyLocal || !state.deletedCloud.recommendations;
+        const showImprint = readOnlyLocal || !state.deletedCloud.imprints;
+        return (
+          '<div class="product-shell">' +
+            renderRail('discover') +
+            '<section class="content-card-outer">' +
+              '<div class="feed-scroll">' +
+                '<div class="feed-container">' +
+                  '<header class="insight-feed-header">' +
+                    '<h2 class="insight-feed-header-title">全部内容</h2>' +
+                    '<div class="insight-feed-header-actions">' +
+                      '<button type="button" class="filter-pill-btn">' + svgIcon('filter', 13) + '<span>筛选</span></button>' +
+                    '</div>' +
+                  '</header>' +
+                  (readOnlyLocal
+                    ? '<div class="local-history-notice">' +
+                        '<span>当前仅展示当前设备上的历史记录，可以同步至云端以生成更多内容</span>' +
+                        '<button type="button" class="local-history-cta" id="bannerGoSettingsBtn">去同步</button>' +
+                      '</div>'
+                    : '') +
+                  (!showRec && !showImprint
+                    ? '<div style="padding:56px 20px;text-align:center;color:var(--cola-text-muted);font-size:13px;">云端推荐和悄悄话已清空。若上方开关仍开启，新内容会在后续对话与整理后继续生成。</div>'
+                    : '<h3 class="feed-date-group-title">' + (readOnlyLocal ? '2026 年 11 月 17 日' : '今天') + '</h3>') +
+                  (showRec
+                    ? '<article class="insight-message-row">' +
+                        '<div class="insight-avatar">Co</div>' +
+                        '<div class="insight-bubble">' +
+                          '<span class="insight-tag">小 Co 的推荐</span>' +
+                          '<h3 class="insight-heading">本地优先同步架构的冲突解决实践</h3>' +
+                          '<p class="insight-body">你最近在排查客户端缓存与云端状态的一致性，这篇长文拆解了本地历史回放和增量合流的设计取舍，应该能提供一些思路。</p>' +
+                          '<a class="content-link-card" href="#preview-article" onclick="return false;">' +
+                            '<div class="source-icon-box">' + svgIcon('link', 18) + '</div>' +
+                            '<div class="source-meta">' +
+                              '<div class="source-title">Local-First Software: Sync without Breaking User Flow</div>' +
+                              '<div class="source-subtitle">inkandswitch.com</div>' +
+                            '</div>' +
+                            '<span class="icon-action-btn" aria-hidden="true">' + svgIcon('copy', 15) + '</span>' +
+                          '</a>' +
+                        '</div>' +
+                        '<div class="insight-actions">' +
+                          '<button type="button" class="insight-action-pill">' + svgIcon('chat', 15) + '<span>和 Cola 聊聊</span></button>' +
+                          '<div class="insight-feedback-group">' +
+                            '<button type="button" class="icon-action-btn"' + disabledAttr + ' aria-label="喜欢">' + svgIcon('heart', 15) + '</button>' +
+                            '<button type="button" class="icon-action-btn" aria-label="分享">' + svgIcon('share', 15) + '</button>' +
+                            '<button type="button" class="icon-action-btn"' + disabledAttr + ' aria-label="更多">' + svgIcon('more', 15) + '</button>' +
+                          '</div>' +
+                        '</div>' +
+                      '</article>'
+                    : '') +
+                  (showImprint
+                    ? '<article class="insight-message-row">' +
+                        '<div class="insight-avatar">Co</div>' +
+                        '<div class="insight-bubble">' +
+                          '<span class="insight-tag">小 Co 的悄悄话</span>' +
+                          '<p class="insight-body">这周连续两天在深夜把复杂需求拆成小步验证，遇到卡点时会先停下来画清状态边界再动手。</p>' +
+                          '<p class="insight-body">其实比起赶进度，先把“用户真正会看到什么”对齐清楚，往往能省掉后面一半的返工。</p>' +
+                          '<div class="imprint-cover">悄悄话插画 · 2026-11-17</div>' +
+                          '<div><button type="button" class="btn btn-sm btn-outline">阅读全文</button></div>' +
+                        '</div>' +
+                        '<div class="insight-actions">' +
+                          '<button type="button" class="insight-action-pill">' + svgIcon('chat', 15) + '<span>和 Cola 聊聊</span></button>' +
+                          '<div class="insight-feedback-group">' +
+                            '<button type="button" class="icon-action-btn"' + disabledAttr + ' aria-label="喜欢">' + svgIcon('heart', 15) + '</button>' +
+                            '<button type="button" class="icon-action-btn"' + disabledAttr + ' aria-label="更多">' + svgIcon('more', 15) + '</button>' +
+                          '</div>' +
+                        '</div>' +
+                      '</article>'
+                    : '') +
+                '</div>' +
+              '</div>' +
+            '</section>' +
+          '</div>'
+        );
+      }
+
+      function renderSwitch(id, checked, label) {
+        return (
+          '<button type="button" role="switch" class="cola-switch" id="' + id + '" aria-checked="' + (checked ? 'true' : 'false') + '" aria-label="' + label + '">' +
+            '<span class="cola-switch-thumb"></span>' +
+          '</button>'
+        );
+      }
+
+      function renderSettingsPage() {
+        const showResumeUpload = state.skipped && !state.migrated;
+        const discoveryEnabled =
+          !showResumeUpload &&
+          (state.switches.awareness || state.switches.recommendation || state.switches.imprint);
+        return (
+          '<div class="product-shell">' +
+            renderRail('settings') +
+            '<section class="content-card-outer">' +
+              '<div class="settings-page-layout">' +
+                '<nav class="settings-sidebar" aria-label="设置">' +
+                  '<div class="settings-sidebar-header">设置</div>' +
+                  '<div class="settings-nav-list">' +
+                    '<button type="button" class="settings-nav-item active">' + svgIcon('sliders', 15) + '<span>通用</span></button>' +
+                    '<button type="button" class="settings-nav-item">' + svgIcon('keyboard', 15) + '<span>快捷键</span></button>' +
+                    '<button type="button" class="settings-nav-item">' + svgIcon('chart', 15) + '<span>积分</span></button>' +
+                    '<button type="button" class="settings-nav-item">' + svgIcon('audio', 15) + '<span>语音</span></button>' +
+                    '<button type="button" class="settings-nav-item">' + svgIcon('shield', 15) + '<span>隐私</span></button>' +
+                    '<button type="button" class="settings-nav-item">' + svgIcon('info', 15) + '<span>关于</span></button>' +
+                  '</div>' +
+                '</nav>' +
+                '<div class="settings-content-scroll">' +
+                  '<div class="settings-content-inner">' +
+                    '<h2 class="settings-page-title">通用</h2>' +
+                    '<div class="settings-module">' +
+                      '<h3 class="settings-module-heading">数据</h3>' +
+                      '<div class="settings-group">' +
+                        '<div class="settings-row">' +
+                          '<div class="settings-row-text">' +
+                            '<div class="settings-row-title">同步记忆到云端</div>' +
+                            '<div class="settings-row-desc">已开启 · 上次同步 2026/11/19 18:30:00</div>' +
+                          '</div>' +
+                          renderSwitch('switchMemorySync', true, '同步记忆到云端') +
+                        '</div>' +
+                        '<div class="settings-row">' +
+                          '<div class="settings-row-text">' +
+                            '<div class="settings-row-title">立即同步记忆</div>' +
+                            '<div class="settings-row-desc">可以同步</div>' +
+                          '</div>' +
+                        '</div>' +
+                        '<div class="settings-row">' +
+                          '<div class="settings-row-text">' +
+                            '<div class="settings-row-title">迁移记忆</div>' +
+                          '</div>' +
+                          '<span style="color:var(--cola-text-muted);font-size:13px;">›</span>' +
+                        '</div>' +
+                        '<div class="settings-row">' +
+                          '<div class="settings-row-text">' +
+                            '<div class="settings-row-title">同步发现到云端</div>' +
+                            '<div class="settings-row-desc">开启后将生成觉知、推荐和悄悄话并保存至云端</div>' +
+                          '</div>' +
+                          renderSwitch('switchDiscoverySync', discoveryEnabled, '同步发现到云端') +
+                        '</div>' +
+                        '<div class="settings-row">' +
+                          '<div class="settings-row-text">' +
+                            '<div class="settings-row-title">删除云端数据</div>' +
+                            '<div class="settings-row-desc">永久删除账号在云端保存的觉知、推荐或悄悄话。</div>' +
+                          '</div>' +
+                          '<button type="button" class="btn btn-sm btn-ghost-destructive" id="openDeleteDialogBtn">删除数据</button>' +
+                        '</div>' +
+                      '</div>' +
+                    '</div>' +
+                  '</div>' +
+                '</div>' +
+              '</div>' +
+            '</section>' +
+          '</div>'
+        );
+      }
+
+      function renderDialogs() {
+        let html = '';
+        if (state.skipDialogOpen) {
+          html +=
+            '<div class="dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="skipDialogTitle">' +
+              '<div class="alert-dialog-content">' +
+                '<div class="alert-dialog-header">' +
+                  '<h2 class="alert-dialog-title" id="skipDialogTitle">确认暂不上传？</h2>' +
+                  '<p class="alert-dialog-desc">将<strong>暂停生成新的觉知、推荐和悄悄话</strong>。之后可随时在「设置 &gt; 通用 &gt; 数据」上传并开启此功能。</p>' +
+                '</div>' +
+                '<div class="alert-dialog-footer">' +
+                  '<button type="button" class="btn btn-lg btn-default" id="cancelSkipBtn">取消</button>' +
+                  '<button type="button" class="btn btn-lg btn-outline" id="confirmSkipBtn">暂不上传</button>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+        }
+        if (state.switchAccountOpen) {
+          html +=
+            '<div class="dialog-backdrop" role="dialog" aria-modal="true" aria-label="切换账号">' +
+              '<div class="alert-dialog-content" style="max-width:340px;">' +
+                '<div class="alert-dialog-header">' +
+                  '<h2 class="alert-dialog-title">选择要上传至的账号</h2>' +
+                  '<p class="alert-dialog-desc">演示切换登录账号后的上传目标状态。</p>' +
+                '</div>' +
+                '<div style="display:flex;flex-direction:column;gap:8px;">' +
+                  '<button type="button" class="btn btn-sm btn-outline" id="pickWechatBtn" style="justify-content:flex-start;border-radius:10px;height:38px;">曙光（微信）</button>' +
+                  '<button type="button" class="btn btn-sm btn-outline" id="pickEmailBtn" style="justify-content:flex-start;border-radius:10px;height:38px;">demo@example.com（邮箱）</button>' +
+                '</div>' +
+                '<div class="alert-dialog-footer">' +
+                  '<button type="button" class="btn btn-lg btn-default" id="closeSwitchBtn">关闭</button>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+        }
+        if (state.deleteDialogOpen) {
+          html +=
+            '<div class="dialog-backdrop" role="alertdialog" aria-modal="true" aria-labelledby="deleteDialogTitle">' +
+              '<div class="alert-dialog-content delete-dialog-content">' +
+                '<div class="alert-dialog-header">' +
+                  '<h2 class="alert-dialog-title" id="deleteDialogTitle">删除云端发现数据？</h2>' +
+                  '<p class="alert-dialog-desc">将从云端永久删除你的觉知、推荐和悄悄话，无法恢复。上方开关及本机记录不受影响。</p>' +
+                '</div>' +
+                '<label class="delete-backup-row">' +
+                  '<button type="button" role="checkbox" id="backupBeforeDeleteCheckbox" class="cola-checkbox" aria-checked="' + (state.backupBeforeDelete ? 'true' : 'false') + '" aria-label="导出至本地">' +
+                    (state.backupBeforeDelete ? svgIcon('check', 11) : '') +
+                  '</button>' +
+                  '<span>导出至本地</span>' +
+                '</label>' +
+                '<div class="alert-dialog-footer">' +
+                  '<button type="button" class="btn btn-lg btn-destructive" id="confirmDeleteBtn">确认删除</button>' +
+                  '<button type="button" class="btn btn-lg btn-outline" id="cancelDeleteBtn">取消</button>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+        }
+        return html;
+      }
+
+      function renderToast() {
+        if (!state.toast) return '';
+        return (
+          '<div class="toast-region">' +
+            '<div class="toast-card" role="status">' +
+              '<span class="toast-success-dot">' + svgIcon('check', 11) + '</span>' +
+              '<span>' + state.toast + '</span>' +
+            '</div>' +
+          '</div>'
+        );
+      }
+
+      function bindEvents() {
+        document.querySelectorAll('[data-nav]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            const target = btn.getAttribute('data-nav');
+            if (target === 'skip_modal') {
+              clearPendingTimer();
+              state.screen = 'choose_owner';
+              state.skipDialogOpen = true;
+              render();
+              return;
+            }
+            gotoScreen(target);
+          });
+        });
+
+        const resetBtn = document.getElementById('resetFlowBtn');
+        if (resetBtn) resetBtn.addEventListener('click', resetAll);
+
+        const openSkip = document.getElementById('openSkipDialogBtn');
+        if (openSkip) openSkip.addEventListener('click', function () {
+          state.skipDialogOpen = true;
+          render();
+        });
+
+        const cancelSkip = document.getElementById('cancelSkipBtn');
+        if (cancelSkip) cancelSkip.addEventListener('click', function () {
+          state.skipDialogOpen = false;
+          render();
+        });
+
+        const confirmSkip = document.getElementById('confirmSkipBtn');
+        if (confirmSkip) confirmSkip.addEventListener('click', function () {
+          state.skipDialogOpen = false;
+          gotoScreen('moving_local');
+        });
+
+        const startUpload = document.getElementById('startUploadBtn');
+        if (startUpload) startUpload.addEventListener('click', function () {
+          state.syncReturnTo = 'discover';
+          gotoScreen('syncing');
+        });
+
+        const openSwitch = document.getElementById('openSwitchAccountBtn');
+        if (openSwitch) openSwitch.addEventListener('click', function () {
+          state.switchAccountOpen = true;
+          render();
+        });
+
+        const pathsInfoBtn = document.getElementById('pathsInfoBtn');
+        const pathsInfoWrap = document.getElementById('pathsInfoWrap');
+        if (pathsInfoBtn && pathsInfoWrap) pathsInfoBtn.addEventListener('click', function () {
+          pathsInfoWrap.classList.toggle('open');
+        });
+
+        const closeSwitch = document.getElementById('closeSwitchBtn');
+        if (closeSwitch) closeSwitch.addEventListener('click', function () {
+          state.switchAccountOpen = false;
+          render();
+        });
+
+        const pickWechat = document.getElementById('pickWechatBtn');
+        if (pickWechat) pickWechat.addEventListener('click', function () {
+          state.selectedAccount = 'wechat';
+          state.switchAccountOpen = false;
+          render();
+        });
+
+        const pickEmail = document.getElementById('pickEmailBtn');
+        if (pickEmail) pickEmail.addEventListener('click', function () {
+          state.selectedAccount = 'email';
+          state.switchAccountOpen = false;
+          render();
+        });
+
+        const railDiscover = document.getElementById('railDiscoverBtn');
+        if (railDiscover) railDiscover.addEventListener('click', function () {
+          gotoScreen('discover');
+        });
+
+        const railSettings = document.getElementById('railSettingsBtn');
+        if (railSettings) railSettings.addEventListener('click', function () {
+          gotoScreen('settings');
+        });
+
+        const bannerGoSettings = document.getElementById('bannerGoSettingsBtn');
+        if (bannerGoSettings) bannerGoSettings.addEventListener('click', function () {
+          gotoScreen('settings');
+        });
+
+        const swDiscoverySync = document.getElementById('switchDiscoverySync');
+        if (swDiscoverySync) swDiscoverySync.addEventListener('click', function () {
+          if (state.skipped && !state.migrated) {
+            state.syncReturnTo = 'settings';
+            gotoScreen('syncing');
+            return;
+          }
+          const next = !(state.switches.awareness || state.switches.recommendation || state.switches.imprint);
+          state.switches.awareness = next;
+          state.switches.recommendation = next;
+          state.switches.imprint = next;
+          render();
+        });
+
+        const openDeleteBtn = document.getElementById('openDeleteDialogBtn');
+        if (openDeleteBtn) openDeleteBtn.addEventListener('click', function () {
+          state.backupBeforeDelete = true;
+          state.deleteDialogOpen = true;
+          render();
+        });
+
+        const backupCheckbox = document.getElementById('backupBeforeDeleteCheckbox');
+        if (backupCheckbox) backupCheckbox.addEventListener('click', function () {
+          state.backupBeforeDelete = !state.backupBeforeDelete;
+          render();
+        });
+
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        if (cancelDeleteBtn) cancelDeleteBtn.addEventListener('click', function () {
+          state.deleteDialogOpen = false;
+          render();
+        });
+
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        if (confirmDeleteBtn) confirmDeleteBtn.addEventListener('click', function () {
+          const backedUp = state.backupBeforeDelete;
+          state.deletedCloud = { awareness: true, recommendations: true, imprints: true };
+          state.deleteDialogOpen = false;
+          showToast(backedUp ? '已导出备份至 ~/Desktop/awareness 并删除云端发现数据' : '已删除云端发现数据');
+        });
+      }
+
+      function render() {
+        document.getElementById('previewToolbar').innerHTML = renderToolbar();
+
+        let body = '';
+        if (state.screen === 'checking') {
+          body = '<div class="startup-loading" role="status" aria-label="加载中">' + svgIcon('loader', 20) + '</div>';
+        } else if (state.screen === 'choose_owner') {
+          body = renderChooseOwner();
+        } else if (state.screen === 'moving_local') {
+          body = renderMovingLocal();
+        } else if (state.screen === 'syncing') {
+          body = renderSyncing();
+        } else if (state.screen === 'settings') {
+          body = renderSettingsPage();
+        } else {
+          body = renderDiscoverPage();
+        }
+
+        const chrome =
+          '<div class="traffic-lights" aria-hidden="true">' +
+            '<span class="traffic-dot red"></span>' +
+            '<span class="traffic-dot yellow"></span>' +
+            '<span class="traffic-dot green"></span>' +
+          '</div>';
+
+        document.getElementById('appWindow').innerHTML = chrome + body + renderDialogs() + renderToast();
+        bindEvents();
+      }
+
+      render();
+    })();
+  </script>
+</body>
+</html>
