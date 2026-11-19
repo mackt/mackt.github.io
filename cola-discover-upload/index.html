@@ -820,6 +820,12 @@
     .skip-dialog-content .alert-dialog-footer { justify-content: center; }
     .skip-dialog-content .alert-dialog-footer .btn { flex: none; height: 36px; padding-inline: 24px; }
 
+    .sync-dialog-content { max-width: 448px; }
+    .sync-dialog-content .alert-dialog-title { margin-bottom: 8px; }
+    .sync-dialog-content .alert-dialog-desc { align-self: stretch; text-align: left; line-height: 24px; }
+    .sync-dialog-content .alert-dialog-footer { flex-direction: row; justify-content: center; }
+    .sync-dialog-content .alert-dialog-footer .btn { flex: none; height: 36px; padding-inline: 20px; }
+
     .delete-dialog-content {
       max-width: 340px;
     }
@@ -2011,7 +2017,7 @@
         if (state.syncDialogOpen) {
           html +=
             '<div class="dialog-backdrop" role="alertdialog" aria-modal="true" aria-labelledby="syncDialogTitle" aria-describedby="syncDialogBody">' +
-              '<div class="alert-dialog-content">' +
+              '<div class="alert-dialog-content sync-dialog-content">' +
                 '<div class="alert-dialog-header">' +
                   '<h2 class="alert-dialog-title" id="syncDialogTitle">同步发现到云端？</h2>' +
                   '<p class="alert-dialog-desc" id="syncDialogBody">Cola 的觉知、洞见和心迹将保存至云端，以便在其他设备上查看。</p>' +
