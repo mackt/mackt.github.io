@@ -1764,24 +1764,12 @@
         );
       }
 
-      function renderMovingLocal() {
+      function renderMigrationLoading(title) {
         return renderMigrationFrame(
           '<div class="memory-migration-card centered">' +
             '<div class="screen-spinner-badge">' + svgIcon('loader', 20) + '</div>' +
             '<div class="migration-header">' +
-              '<h1 class="migration-title">正在准备本地数据</h1>' +
-            '</div>' +
-          '</div>'
-        );
-      }
-
-      function renderSyncing() {
-        return renderMigrationFrame(
-          '<div class="memory-migration-card centered">' +
-            '<div class="screen-spinner-badge">' + svgIcon('loader', 20) + '</div>' +
-            '<div class="migration-header">' +
-              '<h1 class="migration-title">正在上传数据</h1>' +
-              '<div class="migration-lead">正在将这台电脑上的数据上传至你的账号，请稍候。</div>' +
+              '<h1 class="migration-title">' + title + '</h1>' +
             '</div>' +
           '</div>'
         );
@@ -2246,9 +2234,9 @@
         } else if (state.screen === 'choose_owner') {
           body = renderChooseOwner();
         } else if (state.screen === 'moving_local') {
-          body = renderMovingLocal();
+          body = renderMigrationLoading('正在准备本地数据');
         } else if (state.screen === 'syncing') {
-          body = renderSyncing();
+          body = renderMigrationLoading('正在上传数据');
         } else if (state.screen === 'settings') {
           body = renderSettingsPage();
         } else {
