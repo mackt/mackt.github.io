@@ -1933,12 +1933,6 @@
                         '</div>' +
                         '<div class="settings-row">' +
                           '<div class="settings-row-text">' +
-                            '<div class="settings-row-title">迁移记忆</div>' +
-                          '</div>' +
-                          '<span style="color:var(--cola-text-muted);font-size:13px;">›</span>' +
-                        '</div>' +
-                        '<div class="settings-row">' +
-                          '<div class="settings-row-text">' +
                             '<div class="settings-row-title">同步发现到云端</div>' +
                             '<div class="settings-row-desc">开启后将生成觉知、洞见和心迹并保存至云端</div>' +
                           '</div>' +
@@ -1950,6 +1944,12 @@
                             '<div class="settings-row-desc">永久删除账号在云端保存的觉知、洞见或心迹。</div>' +
                           '</div>' +
                           '<button type="button" class="btn btn-sm btn-ghost-destructive" id="openDeleteDialogBtn">删除数据</button>' +
+                        '</div>' +
+                        '<div class="settings-row">' +
+                          '<div class="settings-row-text">' +
+                            '<div class="settings-row-title">迁移记忆</div>' +
+                          '</div>' +
+                          '<span style="color:var(--cola-text-muted);font-size:13px;">›</span>' +
                         '</div>' +
                       '</div>' +
                     '</div>' +
@@ -2136,6 +2136,7 @@
         const bannerGoSettings = document.getElementById('bannerGoSettingsBtn');
         if (bannerGoSettings) bannerGoSettings.addEventListener('click', function () {
           gotoScreen('settings');
+          document.getElementById('switchDiscoverySync')?.scrollIntoView({ block: 'center' });
         });
 
         const swDiscoverySync = document.getElementById('switchDiscoverySync');
